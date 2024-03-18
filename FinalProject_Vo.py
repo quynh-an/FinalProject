@@ -38,4 +38,29 @@ while True:
         print("Invalid option. Please select 1 or 2.")
         
 password_length = random.randrange(password_min, password_max)
-print(password_length)
+
+# Not sure how to code this yet, but writing my general ideas
+# create lists of characters and symbols and digits
+# for i in password_length:
+    # randomize 1, 2, 3, or 4
+        # 1 will be a letter, 2 is a capital listter, 3 is a symbol, 4 is a digit
+        # randomize 1-4 password_length number of times
+        # each time we choose a different value from those lists
+        # put them together and return to the user
+        
+# option 2 idea
+# import the list of words created in TXT file, read into something
+# if there is a way to organize and them randomize a number and select that corresponding number to the words in the txt file that is ideal
+# ranodmize how many numbers and symbols are needed between 1-4
+# keep making strings of words awith numbers and symbols at the end until we fit in the minimum and maximum
+    # example if the first is RedFlamingoLion98$ but this is too many characters, then it can keep making randomized words until
+    # RedDogPillow54#, which is shorter
+    
+# print back out to the user the result and ask if they like it
+# do it again if they do not and keep if they do
+
+# find a way to ask for email and email them when they next need to change the password??? If possible
+
+password_result = ("Results here")
+
+print(password_result)
