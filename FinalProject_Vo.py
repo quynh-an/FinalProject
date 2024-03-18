@@ -28,6 +28,8 @@ while True:
             print("Invalid minimum. Must be positive whole number.") 
             continue
         password_max = input("Enter the maximum number of characters you want for your password: ")
+        password_max = int(password_max)
+        break
     elif password_type == "2":
         password_min = input("Enter the minimum number of characters you need for your password: ")
         password_max = input("Enter the maximum number of characters you want for your password: ")
@@ -35,4 +37,5 @@ while True:
     else:
         print("Invalid option. Please select 1 or 2.")
         
-password_length = random(password_min, password_max)
+password_length = random.randrange(password_min, password_max)
+print(password_length)
