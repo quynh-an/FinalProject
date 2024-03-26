@@ -39,6 +39,10 @@ while True:
         
 password_length = random.randrange(password_min, password_max)
 
+for i in range(1, password_length + 1):
+    character = random.randrange(1,5)
+    print(character)
+
 # Not sure how to code this yet, but writing my general ideas
 # create lists of characters and symbols and digits
 # for i in password_length:
