@@ -39,18 +39,43 @@ while True:
         
 password_length = random.randrange(password_min, password_max)
 
-for i in range(1, password_length + 1):
-    character = random.randrange(1,5)
-    print(character)
+alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+capital_alphabet = [letter.upper() for letter in alphabet]
+digits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+',
+           '{', '}', '[', ']', ';', ':',  '<', '>', ',', '.',
+           '?', '/', '~']
 
+def option1():
+    while True:
+        password_length = random.randrange(password_min, password_max)
+        password_list= []
+        password_result = ""
+        
+        for i in range(1, password_length + 1):
+            type_of_character = random.randrange(1,5)
+            if type_of_character == 1:
+                character = random.choice(alphabet)
+            if type_of_character == 2:
+                character = random.choice(capital_alphabet)
+            if type_of_character == 3:
+                character = random.choice(symbols)
+            if type_of_character == 4:
+                character = str(random.choice(digits))
+            password_list.append(character)
+        
+        for i in password_list:
+            password_result = password_result + i
+        
+        print(password_result)
+        
+        try_again = input("Press any key to exit. Press enter to create another password. ")
+        if try_again:
+            break
+ 
+option1()
 # Not sure how to code this yet, but writing my general ideas
-# create lists of characters and symbols and digits
-# for i in password_length:
-    # randomize 1, 2, 3, or 4
-        # 1 will be a letter, 2 is a capital listter, 3 is a symbol, 4 is a digit
-        # randomize 1-4 password_length number of times
-        # each time we choose a different value from those lists
-        # put them together and return to the user
         
 # option 2 idea
 # import the list of words created in TXT file, read into something
@@ -64,7 +89,3 @@ for i in range(1, password_length + 1):
 # do it again if they do not and keep if they do
 
 # find a way to ask for email and email them when they next need to change the password??? If possible
-
-password_result = ("Results here")
-
-print(password_result)
