@@ -47,6 +47,7 @@ symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+',
            '{', '}', '[', ']', ';', ':',  '<', '>', ',', '.',
            '?', '/', '~']
 
+# Option 1 for Passwords
 def option1():
     while True:
         password_length = random.randrange(password_min, password_max)
@@ -75,6 +76,14 @@ def option1():
             break
  
 option1()
+
+# Option 2 for Passwords
+def option2():
+    #Read in the txt file with 465K words
+    
+# Option 3 Most Memorable using Personal Questions
+    
+
 # Not sure how to code this yet, but writing my general ideas
         
 # option 2 idea
@@ -89,3 +98,13 @@ option1()
 # do it again if they do not and keep if they do
 
 # find a way to ask for email and email them when they next need to change the password??? If possible
+# Use pandas to create a database
+# Ask for the user emails when they get their password if they want to be reminded
+# make csv file and save with pandas in a dataframe to calculate the time based on the date of password entry
+# create a time since email and function that checks its limit and then call function to send an email
+# I have to look into services to send emails
+
+# Use flask to have a UI platform
+# Use data visualizations to show maybe statistics on password protection just to use more of what we learned in class
+# I can also use pandas for password verification questions
+
