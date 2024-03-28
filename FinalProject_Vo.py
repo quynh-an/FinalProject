@@ -10,40 +10,6 @@ Created on Sun Mar 17 23:09:40 2024
 
 import random
 
-print("""
-This is a password generator. It can give you two types of passwords. You can either have 1) a randomized set of letters,
-symbols, and numbers OR  2) you can have strings put together with symbols and numbers. Please base your choice on the needs of the password.
-      """)
-
-while True:
-    password_type = input("What type of password are you looking for? Enter '1' for option 1, and '2' for option 2: ")
-    if password_type == "1":
-        password_min = input("Enter the minimum number of characters you need for your password: ")
-        if "-" in password_min:
-            print("Minimum length must be a positive integer.")
-            continue
-        try:
-           password_min = int(password_min)
-        except:
-            print("Invalid minimum. Must be positive whole number.") 
-            continue
-        password_max = input("Enter the maximum number of characters you want for your password: ")
-        password_max = int(password_max)
-        break
-    elif password_type == "2":
-        while True:
-            try:
-                password_min = int(input("Enter the minimum number of characters you need for your password: "))
-                password_max = int(input("Enter the maximum number of characters you want for your password: "))
-                break
-            except ValueError:
-                print("Enter only an integer number of characters.")
-        break
-    else:
-        print("Invalid option. Please select 1 or 2.")
-        
-password_length = random.randrange(password_min, password_max)
-
 alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 capital_alphabet = [letter.upper() for letter in alphabet]
@@ -81,7 +47,6 @@ def option1():
         if try_again:
             break
  
-#option1()
 
 #Option 2 for Passwords
 def option2():
@@ -91,18 +56,18 @@ def option2():
        words = password_words_file.read()
        for word in words:
            words_to_choose.append(word)
+    need_symbols = input("Do you need symbols in your password? Enter 'y' for yes. Any other key is no.")
+    need_numbers = input("Do you need numbers in your password? Enter 'y' for yes. Any other key is no.")
+    password_length = random.randrange(password_min, password_max)
     
     while True:
-        password_length = random.randrange(password_min, password_max)
         password_words= []
         password_result = ""
         
         num_words_in_pass = random.randrange(1, 4)
         
-        need_symbols = input("Do you need symbols in your password? Enter 'y' for yes. Any other key is no.")
-        need_numbers = input("Do you need numbers in your password? Enter 'y' for yes. Any other key is no.")
-        
         password_result = ""
+        
         for i in range(1, num_words_in_pass + 1):
             choice_word = random.randrange(1, 245880)
             password_words.append(words_to_choose[choice_word])
@@ -122,9 +87,56 @@ def option2():
         
         if len(password_result) == int(password_length):
             break
-    
-    
-option2()
+        
+    print(password_result)   
+
+print("""
+This is a password generator. It can give you two types of passwords. You can either have 1) a randomized set of letters,
+symbols, and numbers OR  2) you can have strings put together with symbols and numbers. Please base your choice on the needs of the password.
+      """)
+
+while True:
+    password_type = input("What type of password are you looking for? Enter '1' for option 1, and '2' for option 2: ")
+    if password_type == "1":
+        password_min = input("Enter the minimum number of characters you need for your password: ")
+        if "-" in password_min:
+            print("Minimum length must be a positive integer.")
+            continue
+        try:
+           password_min = int(password_min)
+        except:
+            print("Invalid minimum. Must be positive whole number.") 
+            continue
+        password_max = input("Enter the maximum number of characters you want for your password: ")
+        password_max = int(password_max)
+        password_length = random.randrange(password_min, password_max)
+        option1()
+        break
+    elif password_type == "2":
+        while True:
+            try:
+                print("You'll be asked for the minimum and maximum character for your password. If you have no answer, leave it blank.")
+                password_min = input("Enter the minimum number of characters you need for your password: ")
+                password_max = input("Enter the maximum number of characters you want for your password: ")
+                if password_min == "":
+                    password_min = 8
+                else:
+                   password_min = int(password_min)
+                if password_max == "":
+                    password_max = 12
+                else:
+                    password_max = int(password_max)
+                password_length = random.randrange(password_min, password_max)
+                option2()
+                break
+            except ValueError:
+                print("Enter only an integer number of characters.")
+        break
+    else:
+        print("Invalid option. Please select 1 or 2.")
+        
+
+
 
 
 # Option 3 Most Memorable using Personal Questions
