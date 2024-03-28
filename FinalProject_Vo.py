@@ -31,8 +31,13 @@ while True:
         password_max = int(password_max)
         break
     elif password_type == "2":
-        password_min = input("Enter the minimum number of characters you need for your password: ")
-        password_max = input("Enter the maximum number of characters you want for your password: ")
+        while True:
+            try:
+                password_min = int(input("Enter the minimum number of characters you need for your password: "))
+                password_max = int(input("Enter the maximum number of characters you want for your password: "))
+                break
+            except ValueError:
+                print("Enter only an integer number of characters.")
         break
     else:
         print("Invalid option. Please select 1 or 2.")
@@ -64,6 +69,7 @@ def option1():
                 character = random.choice(symbols)
             if type_of_character == 4:
                 character = str(random.choice(digits))
+            
             password_list.append(character)
         
         for i in password_list:
@@ -75,12 +81,52 @@ def option1():
         if try_again:
             break
  
-option1()
+#option1()
 
-# Option 2 for Passwords
+#Option 2 for Passwords
 def option2():
-    #Read in the txt file with 465K words
+    words_to_choose = []
+    with open('password_words.txt', 'r') as password_words_file:
+    # Read the file
+       words = password_words_file.read()
+       for word in words:
+           words_to_choose.append(word)
     
+    while True:
+        password_length = random.randrange(password_min, password_max)
+        password_words= []
+        password_result = ""
+        
+        num_words_in_pass = random.randrange(1, 4)
+        
+        need_symbols = input("Do you need symbols in your password? Enter 'y' for yes. Any other key is no.")
+        need_numbers = input("Do you need numbers in your password? Enter 'y' for yes. Any other key is no.")
+        
+        password_result = ""
+        for i in range(1, num_words_in_pass + 1):
+            choice_word = random.randrange(1, 245880)
+            password_words.append(words_to_choose[choice_word])
+        if need_symbols.lower() == 'y':
+            num_symbols = random.randrange(1,3)
+            for i in range(1, num_symbols + 1):
+                symbol = random.choice(symbols)
+                password_words.append(symbol)
+        if need_numbers.lower() == 'y':
+            num_nums = random.randrange(1,4)
+            for i in range(1, num_nums + 1):
+                number = str(random.choice(digits))
+                password_words.append(number)
+        
+        for i in password_words:
+            password_result = password_result + i
+        
+        if len(password_result) == int(password_length):
+            break
+    
+    
+option2()
+
+
 # Option 3 Most Memorable using Personal Questions
     
 
