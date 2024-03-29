@@ -9,7 +9,12 @@ Created on Sun Mar 17 23:09:40 2024
 """ Final Project: Password Generator """
 
 import random
-
+import pandas as pd
+import numpy as np
+from matplotlib import pylab as plt
+from datetime import datetime
+# ==========================================
+# List of symbols, digits, and alphabet
 alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 capital_alphabet = [letter.upper() for letter in alphabet]
@@ -17,9 +22,48 @@ digits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
 symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+',
            '{', '}', '[', ']', ';', ':',  '<', '>', ',', '.',
            '?', '/', '~']
+# ==========================================
+# Show plot to show statistics of password security
+sizes = [80, 20]  # Percentage values
+labels = ['Cracked due to reuse, stolen, or weakness', 'Passwords which have not been cracked.' ]
+colors = ['#1f77b4', '#ff7f0e']
+
+# Create the pie chart
+plt.figure(figsize=(7, 7))  # Set the size of the pie chart
+plt.pie(sizes, labels = labels, colors=colors, startangle=90)
+
+# Add a title
+plt.title('Percent of people who have had passwords cracked.')
+
+# Display the pie chart
+plt.show()
+
+# ============================================
+# Sample data
+data = {
+    'User Email': ['user1@example.com', 'user2@example.com'],
+    'Generated Password': ['abc123', 'xyz789'],
+    'Date': [datetime.now(), datetime.now()],
+    'Security Question 1': ['Question 1', 'Question 2'],
+    'Security Question 2': ['Question 3', 'Question 4'],
+    'Security Question 3': ['Question 5', 'Question 6']
+}
+
+# Create DataFrame
+user_data = pd.DataFrame(data)
+# Define CSS styles for alignment
+styles = [
+    dict(selector="th", props=[("text-align", "center")]),  # Center align headers
+    dict(selector="", props=[("text-align", "center")])  # Center align data cells
+]
+
+# Apply styles to DataFrame
+styled_df = user_data.style.set_table_styles(styles)
+styled_df
+# ============================================
 
 # Option 1 for Passwords
-def option1():
+def option1(password_min, password_max):
     while True:
         password_length = random.randrange(password_min, password_max)
         password_list= []
@@ -49,7 +93,7 @@ def option1():
  
 
 #Option 2 for Passwords
-def option2():
+def option2(password_min, password_max):
     words_to_choose = []
     with open('password_nouns.txt', 'r') as password_words_file:
     # Read the file
@@ -115,52 +159,51 @@ def option2():
         try_again = input("Type 'y' to continue generating another password. Press any other key to exit.")
         if try_again != 'y':
             break
-
-print("""
-This is a password generator. It can give you two types of passwords. You can either have 1) a randomized set of letters,
-symbols, and numbers OR  2) you can have strings put together with symbols and numbers. Please base your choice on the needs of the password.
-      """)
-
-while True:
-    password_type = input("What type of password are you looking for? Enter '1' for option 1, and '2' for option 2: ")
-    if password_type == "1":
-        password_min = input("Enter the minimum number of characters you need for your password: ")
-        if "-" in password_min:
-            print("Minimum length must be a positive integer.")
-            continue
-        try:
-           password_min = int(password_min)
-        except:
-            print("Invalid minimum. Must be positive whole number.") 
-            continue
-        password_max = input("Enter the maximum number of characters you want for your password: ")
-        password_max = int(password_max)
-        password_length = random.randrange(password_min, password_max)
-        option1()
-        break
-    elif password_type == "2":
-        while True:
+def main():
+    print("""
+    This is a password generator. It can give you two types of passwords. You can either have 1) a randomized set of letters,
+    symbols, and numbers OR  2) you can have strings put together with symbols and numbers. Please base your choice on the needs of the password.
+          """)
+    
+    while True:
+        password_type = input("What type of password are you looking for? Enter '1' for option 1, and '2' for option 2: ")
+        if password_type == "1":
+            password_min = input("Enter the minimum number of characters you need for your password: ")
+            if "-" in password_min:
+                print("Minimum length must be a positive integer.")
+                continue
             try:
-                print("You'll be asked for the minimum and maximum character for your password. If you have no answer, leave it blank.")
-                password_min = input("Enter the minimum number of characters you need for your password: ")
-                password_max = input("Enter the maximum number of characters you want for your password: ")
-                if password_min == "":
-                    password_min = 10
-                else:
-                   password_min = int(password_min)
-                if password_max == "":
-                    password_max = 20
-                else:
-                    password_max = int(password_max)
-                password_length = random.randrange(password_min, password_max)
-                option2()
-                break
-            except ValueError:
-                print("Enter only an integer number of characters.")
-        break
-    else:
-        print("Invalid option. Please select 1 or 2.")
+               password_min = int(password_min)
+            except:
+                print("Invalid minimum. Must be positive whole number.") 
+                continue
+            password_max = input("Enter the maximum number of characters you want for your password: ")
+            password_max = int(password_max)
+            option1(password_min, password_max)
+            break
+        elif password_type == "2":
+            while True:
+                try:
+                    print("You'll be asked for the minimum and maximum character for your password. If you have no answer, leave it blank.")
+                    password_min = input("Enter the minimum number of characters you need for your password. Best passwords are > 8: ")
+                    password_max = input("Enter the maximum number of characters you want for your password: ")
+                    if password_min == "":
+                        password_min = 12
+                    else:
+                       password_min = int(password_min)
+                    if password_max == "":
+                        password_max = 20
+                    else:
+                        password_max = int(password_max)
+                    option2(password_min, password_max)
+                    break
+                except ValueError:
+                    print("Enter only an integer number of characters.")
+            break
+        else:
+            print("Invalid option. Please select 1 or 2.")
         
+            
 
 
 
