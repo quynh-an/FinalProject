@@ -41,25 +41,22 @@ plt.show()
 # ============================================
 # Sample data
 data = {
-    'User Email': ['user1@example.com', 'user2@example.com'],
-    'Generated Password': ['abc123', 'xyz789'],
-    'Date': [datetime.now(), datetime.now()],
-    'Security Question 1': ['Question 1', 'Question 2'],
-    'Security Question 2': ['Question 3', 'Question 4'],
-    'Security Question 3': ['Question 5', 'Question 6']
+    'User Email': [],
+    'Generated Password': [],
+    'Date': [],
+    'What is the name of your childhood best friend?': [],
+    'In which city did your parents meet?': [],
+    'What was your first car brand?': [],
+    'What is a nickname you had at home?': [],
+    'What is the name of your first pet?': [],
+    'What is the maiden name of your grandmother?': [],
+    'What is the first concert you attended?': []
 }
 
 # Create DataFrame
 user_data = pd.DataFrame(data)
-# Define CSS styles for alignment
-styles = [
-    dict(selector="th", props=[("text-align", "center")]),  # Center align headers
-    dict(selector="", props=[("text-align", "center")])  # Center align data cells
-]
 
-# Apply styles to DataFrame
-styled_df = user_data.style.set_table_styles(styles)
-styled_df
+print(user_data)
 # ============================================
 
 # Option 1 for Passwords
@@ -91,7 +88,8 @@ def option1(password_min, password_max):
         if try_again:
             break
  
-
+        return password_result
+    
 #Option 2 for Passwords
 def option2(password_min, password_max):
     words_to_choose = []
@@ -159,16 +157,24 @@ def option2(password_min, password_max):
         try_again = input("Type 'y' to continue generating another password. Press any other key to exit.")
         if try_again != 'y':
             break
+        
+        return password_result
+    
 def main():
     print("""
     This is a password generator. It can give you two types of passwords. You can either have 1) a randomized set of letters,
     symbols, and numbers OR  2) you can have strings put together with symbols and numbers. Please base your choice on the needs of the password.
-          """)
+         """)
     
     while True:
+        
+        # Ask for user email and get a date
+        email = input("First, enter an email: ")
+        date = datetime.now()
+        
         password_type = input("What type of password are you looking for? Enter '1' for option 1, and '2' for option 2: ")
         if password_type == "1":
-            password_min = input("Enter the minimum number of characters you need for your password: ")
+            password_min = input("Enter the minimum number of characters you need for your password. Best passwords are > 8: ")
             if "-" in password_min:
                 print("Minimum length must be a positive integer.")
                 continue
@@ -179,7 +185,7 @@ def main():
                 continue
             password_max = input("Enter the maximum number of characters you want for your password: ")
             password_max = int(password_max)
-            option1(password_min, password_max)
+            final_password = option1(password_min, password_max)
             break
         elif password_type == "2":
             while True:
@@ -195,14 +201,65 @@ def main():
                         password_max = 20
                     else:
                         password_max = int(password_max)
-                    option2(password_min, password_max)
+                    final_password = option2(password_min, password_max)
                     break
                 except ValueError:
                     print("Enter only an integer number of characters.")
             break
         else:
             print("Invalid option. Please select 1 or 2.")
+            
+    security_data = security_questions()
         
+       # new_data = {
+           # 'User Email': email ,
+           # 'Generated Password': final_password,
+           # 'Date': date,
+            #'What is the name of your childhood best friend?': security_data[0][1],
+           # 'In which city did your parents meet?': security_data[1][1],
+           # 'What was your first car brand?': security_data[2][1],
+           # 'What is a nickname you had at home?': security_data[3][1],
+           # 'What is the name of your first pet?': security_data[4][1],
+           # 'What is the maiden name of your grandmother?': security_data[5][1],
+           # 'What is the first concert you attended?': security_data[6][1]
+           # }
+            
+def security_questions():
+    security_questions_answers = []
+    want_questions = input("Would you like to add security questions? If yes, enter 'y': ")
+    while True:
+        if want_questions == 'y':
+            security_question = random.randint(1,7)
+            question = list(data.keys())
+            if security_question == 1:
+                security_answer = input(question[3] + ' ')
+            if security_question == 2:
+                security_answer = input(question[4] + ' ')
+            if security_question == 3:
+                security_answer = input(question[5] + ' ')
+            if security_question == 4:
+                security_answer = input(question[6] + ' ')
+            if security_question == 5:
+                security_answer = input(question[7] + ' ')
+            if security_question == 6:
+                security_answer = input(question[8] + ' ')
+            if security_question == 7:
+                security_answer = input(question[9] + ' ')
+        
+        security_questions_answers.append((security_question, security_answer))
+        addtl_questions = input("Would you like to add another security questions? If yes, enter 'y': ")
+        
+        if addtl_questions != 'y':
+            break
+        
+    security_questions_answers = sorted(security_questions_answers)
+
+    print(security_questions_answers)
+        
+
+    return security_questions_answers 
+     
+main()      
             
 
 
