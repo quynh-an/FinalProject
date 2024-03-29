@@ -51,44 +51,70 @@ def option1():
 #Option 2 for Passwords
 def option2():
     words_to_choose = []
-    with open('password_words.txt', 'r') as password_words_file:
+    with open('password_nouns.txt', 'r') as password_words_file:
     # Read the file
        words = password_words_file.read()
-       for word in words:
-           words_to_choose.append(word)
-    need_symbols = input("Do you need symbols in your password? Enter 'y' for yes. Any other key is no.")
-    need_numbers = input("Do you need numbers in your password? Enter 'y' for yes. Any other key is no.")
+       words_to_choose = words.splitlines()
+       
+    need_symbols = input("Do you need symbols in your password? Enter 'y' for yes. Any other key is no. ")
+    need_numbers = input("Do you need numbers in your password? Enter 'y' for yes. Any other key is no. ")
     password_length = random.randrange(password_min, password_max)
+    print(password_length)
     
     while True:
-        password_words= []
-        password_result = ""
+        while True:
+            password_words= []
+            password_result = ""
+            num_words_in_pass = random.randrange(1, 4)
+            
+            password_result = ""
+            for i in range(num_words_in_pass):
+                choice_word = random.choice(words_to_choose)
+                cap = random.choice([False, True])
+                if cap:
+                    word_to_add = choice_word.capitalize()
+                else:
+                    word_to_add = choice_word
+                password_words.append(word_to_add)
+                
+            num_symb = cap = random.choice([False, True])
+            if num_symb:
+                if need_symbols.lower() == 'y':
+                    num_symbols = random.randint(1,2)
+                    for i in range(num_symbols):
+                        symbol = random.choice(symbols)
+                        password_words.append(symbol)
+                    
+                if need_numbers.lower() == 'y':
+                    num_nums = random.randint(1,3)
+                    for i in range(num_nums):
+                        number = str(random.choice(digits))
+                        password_words.append(number)
+            else:
+                if need_numbers.lower() == 'y':
+                    num_nums = random.randint(1,3)
+                    for i in range(num_nums):
+                        number = str(random.choice(digits))
+                        password_words.append(number)
+                    
+                if need_symbols.lower() == 'y':
+                    num_symbols = random.randint(1,2)
+                    for i in range(num_symbols):
+                        symbol = random.choice(symbols)
+                        password_words.append(symbol)
+                        
+            
+            for i in password_words:
+                password_result = password_result + i
+            
+            if len(password_result) == int(password_length):
+                break
         
-        num_words_in_pass = random.randrange(1, 4)
+        print(password_result)
         
-        password_result = ""
-        
-        for i in range(1, num_words_in_pass + 1):
-            choice_word = random.randrange(1, 245880)
-            password_words.append(words_to_choose[choice_word])
-        if need_symbols.lower() == 'y':
-            num_symbols = random.randrange(1,3)
-            for i in range(1, num_symbols + 1):
-                symbol = random.choice(symbols)
-                password_words.append(symbol)
-        if need_numbers.lower() == 'y':
-            num_nums = random.randrange(1,4)
-            for i in range(1, num_nums + 1):
-                number = str(random.choice(digits))
-                password_words.append(number)
-        
-        for i in password_words:
-            password_result = password_result + i
-        
-        if len(password_result) == int(password_length):
+        try_again = input("Type 'y' to continue generating another password. Press any other key to exit.")
+        if try_again != 'y':
             break
-        
-    print(password_result)   
 
 print("""
 This is a password generator. It can give you two types of passwords. You can either have 1) a randomized set of letters,
@@ -119,11 +145,11 @@ while True:
                 password_min = input("Enter the minimum number of characters you need for your password: ")
                 password_max = input("Enter the maximum number of characters you want for your password: ")
                 if password_min == "":
-                    password_min = 8
+                    password_min = 10
                 else:
                    password_min = int(password_min)
                 if password_max == "":
-                    password_max = 12
+                    password_max = 20
                 else:
                     password_max = int(password_max)
                 password_length = random.randrange(password_min, password_max)
@@ -135,7 +161,6 @@ while True:
     else:
         print("Invalid option. Please select 1 or 2.")
         
-
 
 
 
