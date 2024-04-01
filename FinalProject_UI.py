@@ -13,6 +13,7 @@ import pandas as pd
 from flask import Flask, render_template, request
 from matplotlib import pylab as plt
 from datetime import date
+import csv
 
 app = Flask(__name__)
 # ==========================================
@@ -127,47 +128,6 @@ def option2(password_min, password_max, need_numbers, need_symbols):
         
 
 # =======================================================
-"""def security_questions():
-    security_questions_answers = []
-    want_questions = input("Would you like to add security questions? If yes, enter 'y': ")
-    
-    if want_questions.lower() == 'y':
-        questions = {
-            1: "What is the name of your childhood best friend?",
-            2: "In which city did your parents meet?",
-            3: "What was your first car brand?",
-            4: "What is a nickname you had at home?",
-            5: "What is the name of your first pet?",
-            6: "What is the maiden name of your grandmother?",
-            7: "What is the first concert you attended?"
-        }
-    
-        # Shuffle the order of questions
-        shuffled_questions = list(questions.items())
-        random.shuffle(shuffled_questions)
-    
-        for question_number, question_text in shuffled_questions:
-            answer = input(f"{question_text}: ")
-            if answer:
-                security_questions_answers.append((question_number, answer))
-            else:
-                security_questions_answers.append((question_number, ""))
-            
-            addtl_questions = input("Would you like to add another security question? If yes, enter 'y': ")
-            if addtl_questions.lower() != 'y':
-                break
-          
-        # Check if all questions have been answered
-        for question_number, _ in questions.items():
-            if not any(q[0] == question_number for q in security_questions_answers):
-                security_questions_answers.append((question_number, None))
-        
-    security_questions_answers = sorted(security_questions_answers)
-        
-    return security_questions_answers """
-
-
-# =============================================
 # Extract security question answers
 sec_questions = {
         1: 'What is the name of your childhood best friend?',
@@ -236,6 +196,7 @@ def password_generator():
             else:
                 security_answers[question_text] = 'Not answered'
            
+        
         # Append data to user_data list
         if email:
             password_date = date.today()
