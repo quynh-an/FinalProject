@@ -69,7 +69,7 @@ def option1(password_min, password_max):
 # ============================================
 
 #Option 2 for Passwords
-def option2(password_min, password_max):
+def option2(password_min, password_max, need_numbers, need_symbols):
     words_to_choose = []
     with open('password_nouns.txt', 'r') as password_words_file:
     # Read the file
@@ -96,25 +96,25 @@ def option2(password_min, password_max):
             
         num_symb = cap = random.choice([False, True])
         if num_symb:
-            if need_symbols.lower() == 'y':
+            if need_symbols == True:
                 num_symbols = random.randint(1,2)
                 for i in range(num_symbols):
                     symbol = random.choice(symbols)
                     password_words.append(symbol)
                 
-            if need_numbers.lower() == 'y':
+            if need_numbers == True:
                 num_nums = random.randint(1,3)
                 for i in range(num_nums):
                     number = str(random.choice(digits))
                     password_words.append(number)
         else:
-            if need_numbers.lower() == 'y':
+            if need_numbers == True:
                 num_nums = random.randint(1,3)
                 for i in range(num_nums):
                     number = str(random.choice(digits))
                     password_words.append(number)
                 
-            if need_symbols.lower() == 'y':
+            if need_symbols == True:
                 num_symbols = random.randint(1,2)
                 for i in range(num_symbols):
                     symbol = random.choice(symbols)
@@ -283,6 +283,18 @@ def password_generator():
         q3_answer = request.form['answer{{q3}}']
         # Extract other form fields as needed
         
+        if 'symbols' in additives and 'digits' not in additives:
+            need_symbols = True
+            need_numbers = False
+        
+        elif 'digits' in additives and 'symbols' not in additives:
+            need_numbers = True
+            need_symbols = False
+        
+        elif 'digits' and 'symbols' in additives:
+            need_symbols = True
+            need_numbers = True
+        
         if password_type == "random":
             # Call option1 function
             password_min = int(request.form['password_min'])
@@ -292,7 +304,7 @@ def password_generator():
             # Call option2 function
             password_min = int(request.form['password_min'])
             password_max = int(request.form['password_max'])
-            final_password = option2(password_min, password_max) 
+            final_password = option2(password_min, password_max, need_numbers, need_symbols) 
             
         # Randomly choose three security questions
         three_questions = random.sample(list(sec_questions.items()), 3)
@@ -311,12 +323,6 @@ def password_generator():
     
         return render_template('password_generator.html', q1=q1, q2=q2,q3=q3)
     
-    if 'symbols' in additives:
-    
-    elif 'digits' in additives:
-    
-    elif 'digits' and 'symbols' in additives
-
 
 if __name__ == '__main__':
     app.run(debug=True)
