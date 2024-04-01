@@ -160,19 +160,12 @@ def security_questions():
         }
     
         # Shuffle the order of questions
-        shuffled_questions = list(questions.items())
-        random.shuffle(shuffled_questions)
+        shuffled_questions = random.sample(list(questions.items()), 3)
+
     
         for question_number, question_text in shuffled_questions:
             answer = input(f"{question_text}: ")
-            if answer:
-                security_questions_answers.append((question_number, answer))
-            else:
-                security_questions_answers.append((question_number, ""))
-            
-            addtl_questions = input("Would you like to add another security question? If yes, enter 'y': ")
-            if addtl_questions.lower() != 'y':
-                break
+            security_questions_answers.append((question_number, answer))
           
         # Check if all questions have been answered
         for question_number, _ in questions.items():
