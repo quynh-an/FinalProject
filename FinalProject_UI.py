@@ -13,6 +13,8 @@ import pandas as pd
 from flask import Flask, render_template, request
 from matplotlib import pylab as plt
 from datetime import date
+
+app = Flask(__name__)
 # ==========================================
 # List of symbols, digits, and alphabet
 alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -42,34 +44,27 @@ plt.show()
 
 # Option 1 for Passwords
 def option1(password_min, password_max):
-    while True:
-        password_length = random.randrange(password_min, password_max)
-        password_list= []
-        password_result = ""
+    password_length = random.randrange(password_min, password_max)
+    password_list= []
+    password_result = ""
+    
+    for i in range(1, password_length + 1):
+        type_of_character = random.randrange(1,5)
+        if type_of_character == 1:
+            character = random.choice(alphabet)
+        if type_of_character == 2:
+            character = random.choice(capital_alphabet)
+        if type_of_character == 3:
+            character = random.choice(symbols)
+        if type_of_character == 4:
+            character = str(random.choice(digits))
         
-        for i in range(1, password_length + 1):
-            type_of_character = random.randrange(1,5)
-            if type_of_character == 1:
-                character = random.choice(alphabet)
-            if type_of_character == 2:
-                character = random.choice(capital_alphabet)
-            if type_of_character == 3:
-                character = random.choice(symbols)
-            if type_of_character == 4:
-                character = str(random.choice(digits))
-            
-            password_list.append(character)
-        
-        for i in password_list:
-            password_result = password_result + i
-        
-        print(password_result)
-        
-        try_again = input("Press 'y' to create another password. Press another key to exit.")
-        if try_again.lower() != 'y':
-            break
+        password_list.append(character)
+    
+    for i in password_list:
+        password_result = password_result + i
  
-        return password_result
+    return password_result
  
 # ============================================
 
@@ -85,60 +80,53 @@ def option2(password_min, password_max):
     need_numbers = input("Do you need numbers in your password? Enter 'y' for yes. Any other key is no. ")
     password_length = random.randrange(password_min, password_max)
     print(password_length)
-    
+
     while True:
-        while True:
-            password_words= []
-            password_result = ""
-            num_words_in_pass = random.randrange(1, 4)
-            
-            password_result = ""
-            for i in range(num_words_in_pass):
-                choice_word = random.choice(words_to_choose)
-                cap = random.choice([False, True])
-                if cap:
-                    word_to_add = choice_word.capitalize()
-                else:
-                    word_to_add = choice_word
-                password_words.append(word_to_add)
-                
-            num_symb = cap = random.choice([False, True])
-            if num_symb:
-                if need_symbols.lower() == 'y':
-                    num_symbols = random.randint(1,2)
-                    for i in range(num_symbols):
-                        symbol = random.choice(symbols)
-                        password_words.append(symbol)
-                    
-                if need_numbers.lower() == 'y':
-                    num_nums = random.randint(1,3)
-                    for i in range(num_nums):
-                        number = str(random.choice(digits))
-                        password_words.append(number)
+        password_words= []
+        password_result = ""
+        num_words_in_pass = random.randrange(1, 4)
+        
+        password_result = ""
+        for i in range(num_words_in_pass):
+            choice_word = random.choice(words_to_choose)
+            cap = random.choice([False, True])
+            if cap:
+                word_to_add = choice_word.capitalize()
             else:
-                if need_numbers.lower() == 'y':
-                    num_nums = random.randint(1,3)
-                    for i in range(num_nums):
-                        number = str(random.choice(digits))
-                        password_words.append(number)
+                word_to_add = choice_word
+            password_words.append(word_to_add)
+            
+        num_symb = cap = random.choice([False, True])
+        if num_symb:
+            if need_symbols.lower() == 'y':
+                num_symbols = random.randint(1,2)
+                for i in range(num_symbols):
+                    symbol = random.choice(symbols)
+                    password_words.append(symbol)
+                
+            if need_numbers.lower() == 'y':
+                num_nums = random.randint(1,3)
+                for i in range(num_nums):
+                    number = str(random.choice(digits))
+                    password_words.append(number)
+        else:
+            if need_numbers.lower() == 'y':
+                num_nums = random.randint(1,3)
+                for i in range(num_nums):
+                    number = str(random.choice(digits))
+                    password_words.append(number)
+                
+            if need_symbols.lower() == 'y':
+                num_symbols = random.randint(1,2)
+                for i in range(num_symbols):
+                    symbol = random.choice(symbols)
+                    password_words.append(symbol)
                     
-                if need_symbols.lower() == 'y':
-                    num_symbols = random.randint(1,2)
-                    for i in range(num_symbols):
-                        symbol = random.choice(symbols)
-                        password_words.append(symbol)
-                        
-            
-            for i in password_words:
-                password_result = password_result + i
-            
-            if len(password_result) == int(password_length):
-                break
         
-        print(password_result)
+        for i in password_words:
+            password_result = password_result + i
         
-        try_again = input("Type 'y' to continue generating another password. Press any other key to exit.")
-        if try_again != 'y':
+        if len(password_result) == int(password_length):
             break
         
         return password_result
@@ -271,7 +259,30 @@ def main():
     print(user_data)
 
      
-main()      
+#main()   
+
+@app.route('/')
+def index():
+    return render_template('password_generator.html')
+   
+@app.route('/generate', methods=['POST'])
+def generate_password():
+    email = request.form['email']
+    password_type = request.form['option']
+    # Extract other form fields as needed
+    
+    if password_type == "random":
+        # Call option1 function
+        password_min = int(request.form['password_min'])
+        password_max = int(request.form['password_max'])
+        final_password = option1(password_min, password_max)
+    elif password_type == "concat":
+        # Call option2 function
+        password_min = int(request.form['password_min'])
+        password_max = int(request.form['password_max'])
+        final_password = option2(password_min, password_max)
+    else:
+        return "Invalid option"
             
 
 
