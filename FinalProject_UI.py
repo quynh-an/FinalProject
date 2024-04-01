@@ -76,13 +76,12 @@ def option2(password_min, password_max, need_numbers, need_symbols):
        words = password_words_file.read()
        words_to_choose = words.splitlines()
 
-    password_length = random.randrange(password_min, password_max)
-    print(password_length)
+    password_length = random.randint(password_min, password_max)
 
     while True:
         password_words= []
         password_result = ""
-        num_words_in_pass = random.randrange(1, 4)
+        num_words_in_pass = random.randrange(2, 4)
         
         password_result = ""
         for i in range(num_words_in_pass):
@@ -118,16 +117,14 @@ def option2(password_min, password_max, need_numbers, need_symbols):
                 num_symbols = random.randint(1,2)
                 for i in range(num_symbols):
                     symbol = random.choice(symbols)
-                    password_words.append(symbol)
-                    
+                    password_words.append(symbol)                   
         
         for i in password_words:
             password_result = password_result + i
         
         if len(password_result) == int(password_length):
-            break
+            return password_result
         
-        return password_result
 
 # =======================================================
 """def security_questions():
@@ -169,48 +166,6 @@ def option2(password_min, password_max, need_numbers, need_symbols):
         
     return security_questions_answers """
 
-# ================================================
-    
-def main():
-
-    # dataframe outline
-    data = {
-        'User Email': ['sample@gmail.com'],
-        'Generated Password': ['MyPassword.123'],
-        'Date': ['2024-31-03'],
-        'What is the name of your childhood best friend?': ['Abby Smith'],
-        'In which city did your parents meet?': ['New York'],
-        'What was your first car brand?': ['Nissam Altima'],
-        'What is a nickname you had at home?': ['Blue'],
-        'What is the name of your first pet?': ['Spot'],
-        'What is the maiden name of your grandmother?': ['Johnson'],
-        'What is the first concert you attended?': ['One Direction']
-    }
-
-    # Create DataFrame
-    user_data = pd.DataFrame(data)
-    print("""
-    This is a password generator. It can give you two types of passwords. You can either have 1) a randomized set of letters,
-    symbols, and numbers OR  2) you can have strings put together with symbols and numbers. Please base your choice on the needs of the password.
-         """)
-    
-    new_data = {
-        'User Email': [email] ,
-        'Generated Password': [final_password],
-        'Date': [password_date],
-        'What is the name of your childhood best friend?': [security_data[0][1]],
-        'In which city did your parents meet?': [security_data[1][1]],
-        'What was your first car brand?': [security_data[2][1]],
-        'What is a nickname you had at home?': [security_data[3][1]],
-        'What is the name of your first pet?': [security_data[4][1]],
-        'What is the maiden name of your grandmother?': [security_data[5][1]],
-        'What is the first concert you attended?': [security_data[6][1]]
-        }
-            
-
-    
-    print(user_data)
-
 
 # =============================================
 # Extract security question answers
@@ -223,28 +178,15 @@ sec_questions = {
         6:'What is the maiden name of your grandmother?',
         7: 'What is the first concert you attended?'
             }
-
+# Initialize an empty DataFrame
+user_data = []
 # =============================================
 @app.route('/', methods=['GET','POST'])
 def password_generator():
-    # dataframe outline
-    data = {
-        'User Email': ['sample@gmail.com'],
-        'Generated Password': ['MyPassword.123'],
-        'Date': ['2024-31-03'],
-        'What is the name of your childhood best friend?': ['Abby Smith'],
-        'In which city did your parents meet?': ['New York'],
-        'What was your first car brand?': ['Nissam Altima'],
-        'What is a nickname you had at home?': ['Blue'],
-        'What is the name of your first pet?': ['Spot'],
-        'What is the maiden name of your grandmother?': ['Johnson'],
-        'What is the first concert you attended?': ['One Direction']
-    }
-
-    user_data = pd.DataFrame(data)
+    global user_data
     email = ''  # Initialize email outside the POST block
     final_password = ''  # Initialize final_password outside the POST block
-    security_answers = []  # Initialize security_answers outside the POST block
+    security_answers = {}  # Initialize security_answers outside the POST block
     password_date = date.today()
     
     if request.method == 'POST':
@@ -254,14 +196,6 @@ def password_generator():
             email = None 
         password_type = request.form['option']
         additives = request.form.getlist('additions')
-        try:
-            q1_answer = request.form['answer{{ q1 }}']
-            q2_answer = request.form['answer{{ q2 }}']
-            q3_answer = request.form['answer{{ q3 }}']
-        except:
-             q1_answer = None
-             q2_answer = None
-             q3_answer = None
         # Extract other form fields as needed
         
         if 'symbols' in additives and 'digits' not in additives:
@@ -275,6 +209,10 @@ def password_generator():
         elif 'digits' and 'symbols' in additives:
             need_symbols = True
             need_numbers = True
+            
+        elif 'digits' and 'symbols' not in additives:
+            need_symbols = False
+            need_numbers = False
         
         if password_type == "random":
             # Call option1 function
@@ -289,50 +227,37 @@ def password_generator():
             
         # Randomly choose three security questions
         three_questions = random.sample(list(sec_questions.items()), 3)
-        q1 = three_questions[0][1]
-        q2 = three_questions[1][1]
-        q3 = three_questions[2][1]
-        
-        if q1_answer:
-            security_answers.append(three_questions[0][0], q1_answer)
-        if q2_answer:
-            security_answers.append(three_questions[1][0], q2_answer)
-        if q3_answer:
-            security_answers.append(three_questions[2][0], q3_answer)
-        
-        if email != None:
-            # Not all security questions were answered
-            for question_number, _ in sec_questions.items():
-                if not any(q[0] == question_number for q in security_answers):
-                    security_answers.append((question_number, None))
-                    
-            security_data = security_answers
-            
+
+        # Extract security question answers
+        for question_num, question_text in sec_questions.items():
+            answer = request.form.get(f'answer{question_num}')
+            if answer:
+                security_answers[question_text] = answer
+            else:
+                security_answers[question_text] = 'Not answered'
+           
+        # Append data to user_data list
+        if email:
+            password_date = date.today()
             new_data = {
-                'User Email': [email] ,
-                'Generated Password': [final_password],
-                'Date': [password_date],
-                'What is the name of your childhood best friend?': [security_data[0][1]],
-                'In which city did your parents meet?': [security_data[1][1]],
-                'What was your first car brand?': [security_data[2][1]],
-                'What is a nickname you had at home?': [security_data[3][1]],
-                'What is the name of your first pet?': [security_data[4][1]],
-                'What is the maiden name of your grandmother?': [security_data[5][1]],
-                'What is the first concert you attended?': [security_data[6][1]]
-                }
+                'User Email': email,
+                'Generated Password': final_password,
+                'Date': password_date,
+                **security_answers
+            }
+            user_data.append(new_data)
             
-            user_data = pd.concat([user_data, pd.DataFrame(new_data)], ignore_index=True)
-        
-        return render_template('password_generator.html', email=email, final_password=final_password, q1=q1, q2=q2,q3=q3)
+            # Convert user_data list to DataFrame
+            df = pd.DataFrame(user_data)
+            df.to_csv('password_user_data.csv', index=False)
+            
+        return render_template('password_generator.html', email=email, final_password=final_password, three_questions=three_questions)
     
     else:
         # Display the form with randomly selected questions
         three_questions = random.sample(list(sec_questions.items()), 3)
-        q1 = three_questions[0][1]
-        q2 = three_questions[1][1]
-        q3 = three_questions[2][1]
     
-        return render_template('password_generator.html', q1=q1, q2=q2,q3=q3)
+        return render_template('password_generator.html', three_questions=three_questions)
     
 
 if __name__ == '__main__':
