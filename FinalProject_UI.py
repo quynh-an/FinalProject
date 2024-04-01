@@ -130,7 +130,7 @@ def option2(password_min, password_max, need_numbers, need_symbols):
         return password_result
 
 # =======================================================
-def security_questions():
+"""def security_questions():
     security_questions_answers = []
     want_questions = input("Would you like to add security questions? If yes, enter 'y': ")
     
@@ -167,7 +167,7 @@ def security_questions():
         
     security_questions_answers = sorted(security_questions_answers)
         
-    return security_questions_answers 
+    return security_questions_answers """
 
 # ================================================
     
@@ -194,51 +194,6 @@ def main():
     symbols, and numbers OR  2) you can have strings put together with symbols and numbers. Please base your choice on the needs of the password.
          """)
     
-    while True:
-        
-        # Ask for user email and get a date
-        email = input("First, enter an email: ")
-        password_date = date.today()
-        
-        password_type = input("What type of password are you looking for? Enter '1' for option 1, and '2' for option 2: ")
-        if password_type == "1":
-            password_min = input("Enter the minimum number of characters you need for your password. Best passwords are > 8: ")
-            if "-" in password_min:
-                print("Minimum length must be a positive integer.")
-                continue
-            try:
-               password_min = int(password_min)
-            except:
-                print("Invalid minimum. Must be positive whole number.") 
-                continue
-            password_max = input("Enter the maximum number of characters you want for your password: ")
-            password_max = int(password_max)
-            final_password = option1(password_min, password_max)
-            break
-        elif password_type == "2":
-            while True:
-                try:
-                    print("You'll be asked for the minimum and maximum character for your password. If you have no answer, leave it blank.")
-                    password_min = input("Enter the minimum number of characters you need for your password. Best passwords are > 8: ")
-                    password_max = input("Enter the maximum number of characters you want for your password: ")
-                    if password_min == "":
-                        password_min = 12
-                    else:
-                       password_min = int(password_min)
-                    if password_max == "":
-                        password_max = 20
-                    else:
-                        password_max = int(password_max)
-                    final_password = option2(password_min, password_max)
-                    break
-                except ValueError:
-                    print("Enter only an integer number of characters.")
-            break
-        else:
-            print("Invalid option. Please select 1 or 2.")
-            
-    security_data = security_questions()
-        
     new_data = {
         'User Email': [email] ,
         'Generated Password': [final_password],
@@ -252,7 +207,7 @@ def main():
         'What is the first concert you attended?': [security_data[6][1]]
         }
             
-    user_data = pd.concat([user_data, pd.DataFrame(new_data)], ignore_index=True)
+
     
     print(user_data)
 
@@ -268,19 +223,45 @@ sec_questions = {
         6:'What is the maiden name of your grandmother?',
         7: 'What is the first concert you attended?'
             }
+
 # =============================================
 @app.route('/', methods=['GET','POST'])
 def password_generator():
+    # dataframe outline
+    data = {
+        'User Email': ['sample@gmail.com'],
+        'Generated Password': ['MyPassword.123'],
+        'Date': ['2024-31-03'],
+        'What is the name of your childhood best friend?': ['Abby Smith'],
+        'In which city did your parents meet?': ['New York'],
+        'What was your first car brand?': ['Nissam Altima'],
+        'What is a nickname you had at home?': ['Blue'],
+        'What is the name of your first pet?': ['Spot'],
+        'What is the maiden name of your grandmother?': ['Johnson'],
+        'What is the first concert you attended?': ['One Direction']
+    }
+
+    user_data = pd.DataFrame(data)
     email = ''  # Initialize email outside the POST block
     final_password = ''  # Initialize final_password outside the POST block
-    security_answers = {}  # Initialize security_answers outside the POST block
+    security_answers = []  # Initialize security_answers outside the POST block
+    password_date = date.today()
+    
     if request.method == 'POST':
-        email = request.form['email']
+        try:
+            email = request.form['email']
+        except:
+            email = None 
         password_type = request.form['option']
         additives = request.form.getlist('additions')
-        q1_answer = request.form['answer{{q1}}']
-        q2_answer = request.form['answer{{q2}}']
-        q3_answer = request.form['answer{{q3}}']
+        try:
+            q1_answer = request.form['answer{{ q1 }}']
+            q2_answer = request.form['answer{{ q2 }}']
+            q3_answer = request.form['answer{{ q3 }}']
+        except:
+             q1_answer = None
+             q2_answer = None
+             q3_answer = None
         # Extract other form fields as needed
         
         if 'symbols' in additives and 'digits' not in additives:
@@ -311,7 +292,37 @@ def password_generator():
         q1 = three_questions[0][1]
         q2 = three_questions[1][1]
         q3 = three_questions[2][1]
-    
+        
+        if q1_answer:
+            security_answers.append(three_questions[0][0], q1_answer)
+        if q2_answer:
+            security_answers.append(three_questions[1][0], q2_answer)
+        if q3_answer:
+            security_answers.append(three_questions[2][0], q3_answer)
+        
+        if email != None:
+            # Not all security questions were answered
+            for question_number, _ in sec_questions.items():
+                if not any(q[0] == question_number for q in security_answers):
+                    security_answers.append((question_number, None))
+                    
+            security_data = security_answers
+            
+            new_data = {
+                'User Email': [email] ,
+                'Generated Password': [final_password],
+                'Date': [password_date],
+                'What is the name of your childhood best friend?': [security_data[0][1]],
+                'In which city did your parents meet?': [security_data[1][1]],
+                'What was your first car brand?': [security_data[2][1]],
+                'What is a nickname you had at home?': [security_data[3][1]],
+                'What is the name of your first pet?': [security_data[4][1]],
+                'What is the maiden name of your grandmother?': [security_data[5][1]],
+                'What is the first concert you attended?': [security_data[6][1]]
+                }
+            
+            user_data = pd.concat([user_data, pd.DataFrame(new_data)], ignore_index=True)
+        
         return render_template('password_generator.html', email=email, final_password=final_password, q1=q1, q2=q2,q3=q3)
     
     else:
@@ -327,10 +338,10 @@ def password_generator():
 if __name__ == '__main__':
     app.run(debug=True)
 # =============================================
-main()   
+
 password_generator()
 
-            
+
 
 
 
