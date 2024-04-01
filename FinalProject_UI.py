@@ -75,9 +75,7 @@ def option2(password_min, password_max):
     # Read the file
        words = password_words_file.read()
        words_to_choose = words.splitlines()
-       
-    need_symbols = input("Do you need symbols in your password? Enter 'y' for yes. Any other key is no. ")
-    need_numbers = input("Do you need numbers in your password? Enter 'y' for yes. Any other key is no. ")
+
     password_length = random.randrange(password_min, password_max)
     print(password_length)
 
@@ -258,31 +256,74 @@ def main():
     
     print(user_data)
 
-     
-#main()   
 
-@app.route('/')
-def index():
-    return render_template('password_generator.html')
-   
-@app.route('/generate', methods=['POST'])
-def generate_password():
-    email = request.form['email']
-    password_type = request.form['option']
-    # Extract other form fields as needed
+# =============================================
+# Extract security question answers
+sec_questions = {
+        1: 'What is the name of your childhood best friend?',
+        2: 'In which city did your parents meet?',
+        3: 'What was your first car brand?',
+        4: 'What is a nickname you had at home?',
+        5: 'What is the name of your first pet?',
+        6:'What is the maiden name of your grandmother?',
+        7: 'What is the first concert you attended?'
+            }
+# =============================================
+@app.route('/', methods=['GET','POST'])
+def password_generator():
+    email = ''  # Initialize email outside the POST block
+    final_password = ''  # Initialize final_password outside the POST block
+    security_answers = {}  # Initialize security_answers outside the POST block
+    if request.method == 'POST':
+        email = request.form['email']
+        password_type = request.form['option']
+        additives = request.form.getlist('additions')
+        q1_answer = request.form['answer{{q1}}']
+        q2_answer = request.form['answer{{q2}}']
+        q3_answer = request.form['answer{{q3}}']
+        # Extract other form fields as needed
+        
+        if password_type == "random":
+            # Call option1 function
+            password_min = int(request.form['password_min'])
+            password_max = int(request.form['password_max'])
+            final_password = option1(password_min, password_max)
+        elif password_type == "concat":
+            # Call option2 function
+            password_min = int(request.form['password_min'])
+            password_max = int(request.form['password_max'])
+            final_password = option2(password_min, password_max) 
+            
+        # Randomly choose three security questions
+        three_questions = random.sample(list(sec_questions.items()), 3)
+        q1 = three_questions[0][1]
+        q2 = three_questions[1][1]
+        q3 = three_questions[2][1]
     
-    if password_type == "random":
-        # Call option1 function
-        password_min = int(request.form['password_min'])
-        password_max = int(request.form['password_max'])
-        final_password = option1(password_min, password_max)
-    elif password_type == "concat":
-        # Call option2 function
-        password_min = int(request.form['password_min'])
-        password_max = int(request.form['password_max'])
-        final_password = option2(password_min, password_max)
+        return render_template('password_generator.html', email=email, final_password=final_password, q1=q1, q2=q2,q3=q3)
+    
     else:
-        return "Invalid option"
+        # Display the form with randomly selected questions
+        three_questions = random.sample(list(sec_questions.items()), 3)
+        q1 = three_questions[0][1]
+        q2 = three_questions[1][1]
+        q3 = three_questions[2][1]
+    
+        return render_template('password_generator.html', q1=q1, q2=q2,q3=q3)
+    
+    if 'symbols' in additives:
+    
+    elif 'digits' in additives:
+    
+    elif 'digits' and 'symbols' in additives
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+# =============================================
+main()   
+password_generator()
+
             
 
 
