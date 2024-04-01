@@ -211,46 +211,55 @@ def main():
             
     security_data = security_questions()
         
-       # new_data = {
-           # 'User Email': email ,
-           # 'Generated Password': final_password,
-           # 'Date': date,
-            #'What is the name of your childhood best friend?': security_data[0][1],
-           # 'In which city did your parents meet?': security_data[1][1],
-           # 'What was your first car brand?': security_data[2][1],
-           # 'What is a nickname you had at home?': security_data[3][1],
-           # 'What is the name of your first pet?': security_data[4][1],
-           # 'What is the maiden name of your grandmother?': security_data[5][1],
-           # 'What is the first concert you attended?': security_data[6][1]
-           # }
+    new_data = {
+        'User Email': email ,
+        'Generated Password': final_password,
+        'Date': date,
+        'What is the name of your childhood best friend?': security_data[0][1],
+        'In which city did your parents meet?': security_data[1][1],
+        'What was your first car brand?': security_data[2][1],
+        'What is a nickname you had at home?': security_data[3][1],
+        'What is the name of your first pet?': security_data[4][1],
+        'What is the maiden name of your grandmother?': security_data[5][1],
+        'What is the first concert you attended?': security_data[6][1]
+        }
             
+    print(new_data)
+    
 def security_questions():
     security_questions_answers = []
     want_questions = input("Would you like to add security questions? If yes, enter 'y': ")
-    while True:
-        if want_questions == 'y':
-            security_question = random.randint(1,7)
-            question = list(data.keys())
-            if security_question == 1:
-                security_answer = input(question[3] + ' ')
-            if security_question == 2:
-                security_answer = input(question[4] + ' ')
-            if security_question == 3:
-                security_answer = input(question[5] + ' ')
-            if security_question == 4:
-                security_answer = input(question[6] + ' ')
-            if security_question == 5:
-                security_answer = input(question[7] + ' ')
-            if security_question == 6:
-                security_answer = input(question[8] + ' ')
-            if security_question == 7:
-                security_answer = input(question[9] + ' ')
-        
-        security_questions_answers.append((security_question, security_answer))
-        addtl_questions = input("Would you like to add another security questions? If yes, enter 'y': ")
-        
-        if addtl_questions != 'y':
-            break
+    
+    if want_questions.lower() == 'y':
+        questions = {
+            1: "What is the name of your childhood best friend?",
+            2: "In which city did your parents meet?",
+            3: "What was your first car brand?",
+            4: "What is a nickname you had at home?",
+            5: "What is the name of your first pet?",
+            6: "What is the maiden name of your grandmother?",
+            7: "What is the first concert you attended?"
+        }
+    
+        # Shuffle the order of questions
+        shuffled_questions = list(questions.items())
+        random.shuffle(shuffled_questions)
+    
+        for question_number, question_text in shuffled_questions:
+            answer = input(f"{question_text}: ")
+            if answer:
+                security_questions_answers.append((question_number, answer))
+            else:
+                security_questions_answers.append((question_number, ""))
+            
+            addtl_questions = input("Would you like to add another security question? If yes, enter 'y': ")
+            if addtl_questions.lower() != 'y':
+                break
+          
+        # Check if all questions have been answered
+        for question_number, _ in questions.items():
+            if not any(q[0] == question_number for q in security_questions_answers):
+                security_questions_answers.append((question_number, ""))
         
     security_questions_answers = sorted(security_questions_answers)
 
