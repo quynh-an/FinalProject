@@ -176,8 +176,12 @@ def password_generator():
         
         if password_type == "random":
             # Call option1 function
-            password_min = int(request.form['password_min'])
-            password_max = int(request.form['password_max'])
+            try:
+                password_min = int(request.form['password_min'])
+                password_max = int(request.form['password_max'])
+            except:
+                password_min = 9
+                password_max = 16
             final_password = option1(password_min, password_max)
         elif password_type == "concat":
             # Call option2 function
@@ -207,10 +211,12 @@ def password_generator():
                 **security_answers
             }
             user_data.append(new_data)
-            
             # Convert user_data list to DataFrame
             df = pd.DataFrame(user_data)
-            df.to_csv('password_user_data.csv', index=False)
+        
+        df2 = pd.read_csv('password_user_data.csv')
+        df2 = pd.concat([df2, df])
+        df2.to_csv('password_user_data.csv')
             
         return render_template('password_generator.html', email=email, final_password=final_password, three_questions=three_questions)
     
