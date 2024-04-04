@@ -41,6 +41,38 @@ plt.title('Percent of people who have had passwords cracked.')
 # Display the pie chart
 plt.show()
 
+# =============================================
+
+# Extract security question answers
+sec_questions = {
+        1: 'What is the name of your childhood best friend?',
+        2: 'In which city did your parents meet?',
+        3: 'What was your first car brand?',
+        4: 'What is a nickname you had at home?',
+        5: 'What is the name of your first pet?',
+        6:'What is the maiden name of your grandmother?',
+        7: 'What is the first concert you attended?'
+            }
+# Initialize an empty DataFrame
+user_data = []
+
+# =============================================
+# Append data to user_data list
+def add_to_csv(email, final_password, security_answers, user_data):
+    password_date = date.today()
+    new_data = {
+        'User Email': email,
+        'Generated Password': final_password,
+        'Date': password_date,
+        **security_answers
+    }
+    user_data.append(new_data)
+    # Convert user_data list to DataFrame
+    df = pd.DataFrame(user_data)
+    
+    df2 = pd.read_csv('password_user_data.csv')
+    df2 = pd.concat([df2, df])
+    df2.to_csv('password_user_data.csv', index=False)
 # ============================================
 
 # Option 1 for Passwords
@@ -128,26 +160,14 @@ def option2(password_min, password_max, need_numbers, need_symbols):
         
 
 # =======================================================
-# Extract security question answers
-sec_questions = {
-        1: 'What is the name of your childhood best friend?',
-        2: 'In which city did your parents meet?',
-        3: 'What was your first car brand?',
-        4: 'What is a nickname you had at home?',
-        5: 'What is the name of your first pet?',
-        6:'What is the maiden name of your grandmother?',
-        7: 'What is the first concert you attended?'
-            }
-# Initialize an empty DataFrame
-user_data = []
-# =============================================
+create_password_csv()
+# =======================================================
 @app.route('/', methods=['GET','POST'])
 def password_generator():
     global user_data
     email = ''  # Initialize email outside the POST block
     final_password = ''  # Initialize final_password outside the POST block
     security_answers = {}  # Initialize security_answers outside the POST block
-    password_date = date.today()
     
     if request.method == 'POST':
         try:
@@ -201,36 +221,22 @@ def password_generator():
                 security_answers[question_text] = 'Not answered'
            
         
-        # Append data to user_data list
-        if email:
-            password_date = date.today()
-            new_data = {
-                'User Email': email,
-                'Generated Password': final_password,
-                'Date': password_date,
-                **security_answers
-            }
-            user_data.append(new_data)
-            # Convert user_data list to DataFrame
-            df = pd.DataFrame(user_data)
-        
-        df2 = pd.read_csv('password_user_data.csv')
-        df2 = pd.concat([df2, df])
-        df2.to_csv('password_user_data.csv')
+        add_to_csv(email, final_password, security_answers, user_data)
             
         return render_template('password_generator.html', email=email, final_password=final_password, three_questions=three_questions)
     
     else:
         # Display the form with randomly selected questions
         three_questions = random.sample(list(sec_questions.items()), 3)
+        
     
         return render_template('password_generator.html', three_questions=three_questions)
     
 
 if __name__ == '__main__':
     app.run(debug=True)
-# =============================================
 
+# =============================================
 password_generator()
 
 
