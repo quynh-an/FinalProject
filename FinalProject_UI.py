@@ -50,29 +50,11 @@ sec_questions = {
         3: 'What was your first car brand?',
         4: 'What is a nickname you had at home?',
         5: 'What is the name of your first pet?',
-        6:'What is the maiden name of your grandmother?',
-        7: 'What is the first concert you attended?'
+        6: 'What is the maiden name of your grandmother?',
+        7: 'What is the first concert you attended?',
+        8: 'What was the name of your 7th grade history teacher?',
+        9: 'What is your favorite film you saw in theaters?'
             }
-# Initialize an empty DataFrame
-user_data = []
-
-# =============================================
-# Append data to user_data list
-def add_to_csv(email, final_password, security_answers, user_data):
-    password_date = date.today()
-    new_data = {
-        'User Email': email,
-        'Generated Password': final_password,
-        'Date': password_date,
-        **security_answers
-    }
-    user_data.append(new_data)
-    # Convert user_data list to DataFrame
-    df = pd.DataFrame(user_data)
-    
-    df2 = pd.read_csv('password_user_data.csv')
-    df2 = pd.concat([df2, df])
-    df2.to_csv('password_user_data.csv', index=False)
 # ============================================
 
 # Option 1 for Passwords
@@ -124,10 +106,11 @@ def option2(password_min, password_max, need_numbers, need_symbols):
                 word_to_add = choice_word.capitalize()
             else:
                 word_to_add = choice_word
+            
             password_words.append(word_to_add)
             
-        num_symb = cap = random.choice([False, True])
-        if num_symb:
+        order_num_symb = random.choice([False, True])
+        if order_num_symb:
             if need_symbols == True:
                 num_symbols = random.randint(1,2)
                 for i in range(num_symbols):
@@ -158,41 +141,69 @@ def option2(password_min, password_max, need_numbers, need_symbols):
         if len(password_result) == int(password_length):
             return password_result
         
+# =============================================
+# Append data to user_data list
+def add_to_csv(email, final_password, security_answers):
+    df = pd.read_csv('password_user_data.csv')
+    all_stored_emails = df['User Email'].tolist()
+    if email in all_stored_emails:
+        current_num_passwords = all_stored_emails.count(email)
+        current_num_passwords += 1
+    else:
+        current_num_passwords = 1
+    password_date = date.today()
+    # Initialize an empty data list
+    new_data = {
+        'User Email': email,
+        'Index of password associated with this email': current_num_passwords,
+        'Generated Password': final_password,
+        'Date': password_date,
+        **security_answers
+    }
+    # Convert user_data list to DataFrame
+    df2 = pd.DataFrame([new_data])
+    
+    df = pd.concat([df, df2], ignore_index=True)
+    
+    df.to_csv('password_user_data.csv', index=False)
 
 # =======================================================
-create_password_csv()
+def numbers_and_symbols(additives):
+
+    if 'symbols' in additives and 'digits' not in additives:
+        need_symbols = True
+        need_numbers = False
+    
+    elif 'digits' in additives and 'symbols' not in additives:
+        need_numbers = True
+        need_symbols = False
+    
+    elif 'digits' and 'symbols' in additives:
+        need_symbols = True
+        need_numbers = True
+        
+    elif 'digits' and 'symbols' not in additives:
+        need_symbols = False
+        need_numbers = False
+    
+    return (need_symbols, need_numbers)
+
 # =======================================================
 @app.route('/', methods=['GET','POST'])
 def password_generator():
-    global user_data
-    email = ''  # Initialize email outside the POST block
-    final_password = ''  # Initialize final_password outside the POST block
-    security_answers = {}  # Initialize security_answers outside the POST block
+    email = ''  
+    final_password = ''  
+    security_answers = {}  
     
     if request.method == 'POST':
         try:
-            email = request.form['email']
+            email = request.form['email'].lower()
         except:
             email = None 
         password_type = request.form['option']
         additives = request.form.getlist('additions')
-        # Extract other form fields as needed
         
-        if 'symbols' in additives and 'digits' not in additives:
-            need_symbols = True
-            need_numbers = False
-        
-        elif 'digits' in additives and 'symbols' not in additives:
-            need_numbers = True
-            need_symbols = False
-        
-        elif 'digits' and 'symbols' in additives:
-            need_symbols = True
-            need_numbers = True
-            
-        elif 'digits' and 'symbols' not in additives:
-            need_symbols = False
-            need_numbers = False
+        numbers_symbols = numbers_and_symbols(additives)
         
         if password_type == "random":
             # Call option1 function
@@ -204,10 +215,10 @@ def password_generator():
                 password_max = 16
             final_password = option1(password_min, password_max)
         elif password_type == "concat":
-            # Call option2 function
+            # Call option 2 function
             password_min = int(request.form['password_min'])
             password_max = int(request.form['password_max'])
-            final_password = option2(password_min, password_max, need_numbers, need_symbols) 
+            final_password = option2(password_min, password_max, numbers_symbols[0], numbers_symbols[1]) 
             
         # Randomly choose three security questions
         three_questions = random.sample(list(sec_questions.items()), 3)
@@ -221,7 +232,7 @@ def password_generator():
                 security_answers[question_text] = 'Not answered'
            
         
-        add_to_csv(email, final_password, security_answers, user_data)
+        add_to_csv(email, final_password, security_answers)
             
         return render_template('password_generator.html', email=email, final_password=final_password, three_questions=three_questions)
     
