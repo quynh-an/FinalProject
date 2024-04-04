@@ -203,6 +203,7 @@ def password_generator():
         password_type = request.form['option']
         additives = request.form.getlist('additions')
         
+        # Check for user number and symbols
         numbers_symbols = numbers_and_symbols(additives)
         
         if password_type == "random":
@@ -211,13 +212,17 @@ def password_generator():
                 password_min = int(request.form['password_min'])
                 password_max = int(request.form['password_max'])
             except:
-                password_min = 9
+                password_min = 10
                 password_max = 16
             final_password = option1(password_min, password_max)
         elif password_type == "concat":
             # Call option 2 function
-            password_min = int(request.form['password_min'])
-            password_max = int(request.form['password_max'])
+            try:
+                password_min = int(request.form['password_min'])
+                password_max = int(request.form['password_max'])
+            except:
+                password_min = 10
+                password_max = 20
             final_password = option2(password_min, password_max, numbers_symbols[0], numbers_symbols[1]) 
             
         # Randomly choose three security questions
@@ -231,8 +236,8 @@ def password_generator():
             else:
                 security_answers[question_text] = 'Not answered'
            
-        
-        add_to_csv(email, final_password, security_answers)
+        if email and list(security_answers.values()).count('Not answered') == 6:
+            save_success = add_to_csv(email, final_password, security_answers)
             
         return render_template('password_generator.html', email=email, final_password=final_password, three_questions=three_questions)
     
@@ -242,13 +247,18 @@ def password_generator():
         
     
         return render_template('password_generator.html', three_questions=three_questions)
+
+#==============================================
+@app.route('/forgot_password', methods=['GET','POST'])
+def forgot_password():
+    
     
 
 if __name__ == '__main__':
     app.run(debug=True)
 
 # =============================================
-password_generator()
+
 
 
 
