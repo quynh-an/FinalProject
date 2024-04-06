@@ -196,11 +196,19 @@ def password_generator():
     security_answers = {}  
     
     if request.method == 'POST':
+        # Randomly choose three security questions
+        three_questions = random.sample(list(sec_questions.items()), 3)
+        
         try:
             email = request.form['email'].lower()
         except:
             email = None 
-        password_type = request.form['option']
+        try:
+            password_type = request.form['option']
+        except:
+            no_entry = True  
+            return render_template('password_generator.html', three_questions=three_questions, no_entry=no_entry)
+        
         additives = request.form.getlist('additions')
         
         # Check for user number and symbols
@@ -215,6 +223,7 @@ def password_generator():
                 password_min = 10
                 password_max = 16
             final_password = option1(password_min, password_max)
+        
         elif password_type == "concat":
             # Call option 2 function
             try:
@@ -224,10 +233,7 @@ def password_generator():
                 password_min = 10
                 password_max = 20
             final_password = option2(password_min, password_max, numbers_symbols[0], numbers_symbols[1]) 
-            
-        # Randomly choose three security questions
-        three_questions = random.sample(list(sec_questions.items()), 3)
-
+        
         # Extract security question answers
         for question_num, question_text in sec_questions.items():
             answer = request.form.get(f'answer{question_num}')
@@ -238,8 +244,10 @@ def password_generator():
            
         if email and list(security_answers.values()).count('Not answered') == 6:
             save_success = add_to_csv(email, final_password, security_answers)
+        else:
+            save_success = False
             
-        return render_template('password_generator.html', email=email, final_password=final_password, three_questions=three_questions)
+        return render_template('password_generator.html', email=email, final_password=final_password, three_questions=three_questions, save_success=save_success)
     
     else:
         # Display the form with randomly selected questions
@@ -251,8 +259,29 @@ def password_generator():
 #==============================================
 @app.route('/forgot_password', methods=['GET','POST'])
 def forgot_password():
-    
-    
+    email = ''  
+    if request.method == 'POST':
+        email = request.form['forgot_pass_email'].lower()
+        saved_passwords = pd.read_csv('password_user_data.csv', header=0)
+        
+        user_entries = saved_passwords[saved_passwords['User Email'] == email]
+        security_questions_forgot_password = []
+        if not user_entries.empty:
+            num_of_passwords = user_entries['Index of password associated with this email'].max()
+            # Randomly select a row from the filtered DataFrame
+            random_password = user_entries.sample(n=1)
+            for column_name, cell_value in random_password.iteritems():
+                if cell_value != 'Not answered':
+                    security_questions_forgot_password.append(column_name)
+                    
+            return render_template('forgot_password.html', num_of_passwords=num_of_passwords, security_questions_forgot_password=security_questions_forgot_password)
+
+        else:
+            no_saved_passwords = True
+            return render_template('forgot_password.html', no_saved_passwords=no_saved_passwords)
+    else:
+        return render_template('forgot_password.html')
+            
 
 if __name__ == '__main__':
     app.run(debug=True)
