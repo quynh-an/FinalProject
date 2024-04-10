@@ -277,23 +277,17 @@ def forgot_password():
         session['global_email'] = global_email
         saved_passwords = pd.read_csv('password_user_data.csv', header=0)
         user_entries = saved_passwords[saved_passwords['User Email'] == global_email]
-        print("Global Email in forgot_pass:", global_email)
-        print(user_entries)
-        
+
         if not user_entries.empty:
             no_saved_passwords = False
             random_line = user_entries.sample(n=1)
-            print("Random line:", random_line)  # Check random_line
             for question_num, question_text in sec_questions.items():
                 answer = random_line[question_text].iloc[0]
-                print("Answer for question", question_num, ":", answer)  # Check answer for each question
                 if answer != 'Not answered':
                     questions_to_answer_to_get_passwords[question_num] = question_text
                     answers_to_presented_questions.append(answer)
             session['answers_to_presented_questions'] = answers_to_presented_questions
             session['questions_to_answer_to_get_passwords'] = questions_to_answer_to_get_passwords
-            print("Questions to answer:", questions_to_answer_to_get_passwords)  # Check questions_to_answer_to_get_passwords
-            print(answers_to_presented_questions)
             
                 
             # Check if questions dictionary is empty
@@ -306,7 +300,6 @@ def forgot_password():
 
         else:
             no_saved_passwords = True
-            print("no saved password")
             return render_template('forgot_password.html', no_saved_passwords=no_saved_passwords)
     else:
         return render_template('forgot_password.html')
@@ -318,12 +311,8 @@ def get_passwords():
    global_email = session.get('global_email')
    answers_to_presented_questions = session.get('answers_to_presented_questions')
    questions_to_answer_to_get_passwords = session.get('questions_to_answer_to_get_passwords')
-   print('passwords to present:' , answers_to_presented_questions)
-   print("Global Email:", global_email)
    saved_passwords = pd.read_csv('password_user_data.csv', header=0)
    user_entries = saved_passwords[saved_passwords['User Email'] == global_email]
-   print("User entries:", user_entries)
-   print("Questions to answer:", questions_to_answer_to_get_passwords)
    
    if request.method == 'POST':
         answers_given = []
