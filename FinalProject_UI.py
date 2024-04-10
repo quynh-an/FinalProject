@@ -13,7 +13,7 @@ import pandas as pd
 from flask import Flask, render_template, request, session
 from matplotlib import pylab as plt
 from datetime import date
-import sqlite3
+
 
 app = Flask(__name__)
 # Set a secret key for the application
