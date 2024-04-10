@@ -10,12 +10,14 @@ Created on Sun Mar 31 21:12:59 2024
 
 import random
 import pandas as pd
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from matplotlib import pylab as plt
 from datetime import date
-import csv
+import sqlite3
 
 app = Flask(__name__)
+# Set a secret key for the application
+app.secret_key = 'eece2140pythonproject'
 # ==========================================
 # List of symbols, digits, and alphabet
 alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -40,6 +42,15 @@ plt.title('Percent of people who have had passwords cracked.')
 
 # Display the pie chart
 plt.show()
+
+# =============================================
+# Global variables for use later
+global global_email
+global_email = ''
+global questions_to_answer_to_get_passwords
+questions_to_answer_to_get_passwords = {}
+global answers_to_presented_questions
+answers_to_presented_questions = []
 
 # =============================================
 
@@ -234,7 +245,7 @@ def password_generator():
                 password_max = 20
             final_password = option2(password_min, password_max, numbers_symbols[0], numbers_symbols[1]) 
         
-        # Extract security question answers
+        
         for question_num, question_text in sec_questions.items():
             answer = request.form.get(f'answer{question_num}')
             if answer:
@@ -259,29 +270,74 @@ def password_generator():
 #==============================================
 @app.route('/forgot_password', methods=['GET','POST'])
 def forgot_password():
-    email = ''  
+    questions_to_answer_to_get_passwords = {}
+    answers_to_presented_questions = []
     if request.method == 'POST':
-        email = request.form['forgot_pass_email'].lower()
+        global_email = request.form['forgot_pass_email'].lower()
+        session['global_email'] = global_email
         saved_passwords = pd.read_csv('password_user_data.csv', header=0)
-        
-        user_entries = saved_passwords[saved_passwords['User Email'] == email]
-        security_questions_forgot_password = []
+        user_entries = saved_passwords[saved_passwords['User Email'] == global_email]
+        print("Global Email in forgot_pass:", global_email)
+        print(user_entries)
         if not user_entries.empty:
-            num_of_passwords = user_entries['Index of password associated with this email'].max()
-            # Randomly select a row from the filtered DataFrame
-            random_password = user_entries.sample(n=1)
-            for column_name, cell_value in random_password.iteritems():
-                if cell_value != 'Not answered':
-                    security_questions_forgot_password.append(column_name)
-                    
-            return render_template('forgot_password.html', num_of_passwords=num_of_passwords, security_questions_forgot_password=security_questions_forgot_password)
+            no_saved_passwords = False
+            random_line = user_entries.sample(n=1)
+            print("Random line:", random_line)  # Check random_line
+            for question_num, question_text in sec_questions.items():
+                answer = random_line[question_text].iloc[0]
+                print("Answer for question", question_num, ":", answer)  # Check answer for each question
+                if answer != 'Not answered':
+                    questions_to_answer_to_get_passwords[question_num] = question_text
+                    answers_to_presented_questions.append(answer)
+            session['answers_to_presented_questions'] = answers_to_presented_questions
+            session['questions_to_answer_to_get_passwords'] = questions_to_answer_to_get_passwords
+            print("Questions to answer:", questions_to_answer_to_get_passwords)  # Check questions_to_answer_to_get_passwords
+            print(answers_to_presented_questions)
+            
+                
+            # Check if questions dictionary is empty
+            if not questions_to_answer_to_get_passwords:
+                no_questions = True
+            else:
+                no_questions = False
+                
+            return render_template('forgot_password.html', no_saved_passwords=no_saved_passwords, questions_to_answer_to_get_passwords=questions_to_answer_to_get_passwords, no_questions=no_questions, )
 
         else:
             no_saved_passwords = True
-            return render_template('forgot_password.html', no_saved_passwords=no_saved_passwords)
+            return render_template('forgot_password.html')
     else:
         return render_template('forgot_password.html')
             
+# =============================================
+@app.route('/get_passwords', methods=['GET','POST'])
+def get_passwords():
+   global_email = session.get('global_email')
+   answers_to_presented_questions = session.get('answers_to_presented_questions')
+   questions_to_answer_to_get_passwords = session.get('questions_to_answer_to_get_passwords')
+   print('passwords to present:' , answers_to_presented_questions)
+   print("Global Email:", global_email)
+   saved_passwords = pd.read_csv('password_user_data.csv', header=0)
+   user_entries = saved_passwords[saved_passwords['User Email'] == global_email]
+   print("User entries:", user_entries)
+   print("Questions to answer:", questions_to_answer_to_get_passwords)
+   if request.method == 'POST':
+        answers_given = []
+        for question_number, question_text in questions_to_answer_to_get_passwords.items():
+            answer = request.form.get(f'get_pass_answer{question_number}', '')
+            answers_given.append(answer)
+        
+        print("Answers Given:", answers_given)
+        
+        if answers_given == answers_to_presented_questions:
+            print_passwords = True
+            passwords_to_present = user_entries['Generated Password']
+            print('passwords',passwords_to_present)
+            return render_template('get_passwords.html', passwords_to_present=passwords_to_present, print_passwords=print_passwords, global_email=global_email, user_entries=user_entries, questions_to_answer_to_get_passwords=questions_to_answer_to_get_passwords)
+        else:
+            return render_template('get_passwords.html', message="Your answers do not match.", questions_to_answer_to_get_passwords=questions_to_answer_to_get_passwords)
+   else:
+        return render_template('get_passwords.html', questions_to_answer_to_get_passwords=questions_to_answer_to_get_passwords, global_email=global_email)
 
 if __name__ == '__main__':
     app.run(debug=True)
