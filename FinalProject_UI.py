@@ -279,6 +279,7 @@ def forgot_password():
         user_entries = saved_passwords[saved_passwords['User Email'] == global_email]
         print("Global Email in forgot_pass:", global_email)
         print(user_entries)
+        
         if not user_entries.empty:
             no_saved_passwords = False
             random_line = user_entries.sample(n=1)
@@ -305,13 +306,15 @@ def forgot_password():
 
         else:
             no_saved_passwords = True
-            return render_template('forgot_password.html')
+            print("no saved password")
+            return render_template('forgot_password.html', no_saved_passwords=no_saved_passwords)
     else:
         return render_template('forgot_password.html')
             
 # =============================================
 @app.route('/get_passwords', methods=['GET','POST'])
 def get_passwords():
+   print_passwords = False
    global_email = session.get('global_email')
    answers_to_presented_questions = session.get('answers_to_presented_questions')
    questions_to_answer_to_get_passwords = session.get('questions_to_answer_to_get_passwords')
@@ -321,19 +324,18 @@ def get_passwords():
    user_entries = saved_passwords[saved_passwords['User Email'] == global_email]
    print("User entries:", user_entries)
    print("Questions to answer:", questions_to_answer_to_get_passwords)
+   
    if request.method == 'POST':
         answers_given = []
         for question_number, question_text in questions_to_answer_to_get_passwords.items():
             answer = request.form.get(f'get_pass_answer{question_number}', '')
             answers_given.append(answer)
         
-        print("Answers Given:", answers_given)
-        
         if answers_given == answers_to_presented_questions:
             print_passwords = True
             passwords_to_present = user_entries['Generated Password']
             print('passwords',passwords_to_present)
-            return render_template('get_passwords.html', passwords_to_present=passwords_to_present, print_passwords=print_passwords, global_email=global_email, user_entries=user_entries, questions_to_answer_to_get_passwords=questions_to_answer_to_get_passwords)
+            return render_template('get_passwords.html', passwords_to_present=passwords_to_present, print_passwords=print_passwords, global_email=global_email, user_entries=user_entries)
         else:
             return render_template('get_passwords.html', message="Your answers do not match.", questions_to_answer_to_get_passwords=questions_to_answer_to_get_passwords)
    else:
