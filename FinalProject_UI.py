@@ -70,12 +70,17 @@ sec_questions = {
 
 # Option 1 for Passwords
 def option1(password_min, password_max):
+    # randomize password length given input
     password_length = random.randrange(password_min, password_max)
+    # make list for password parts
     password_list= []
     password_result = ""
     
+    # iteratre through the randomized length of password
     for i in range(1, password_length + 1):
+        # randomize a type of character
         type_of_character = random.randrange(1,5)
+        # if 1, then lowercase, if 2 uppercase, if 3 symbol, if 4, digit
         if type_of_character == 1:
             character = random.choice(alphabet)
         if type_of_character == 2:
@@ -84,9 +89,10 @@ def option1(password_min, password_max):
             character = random.choice(symbols)
         if type_of_character == 4:
             character = str(random.choice(digits))
-        
+        # add the randomized character to a list
         password_list.append(character)
-    
+    # iteratre through that list of characters
+    # add them together to make a random string of characters
     for i in password_list:
         password_result = password_result + i
  
@@ -94,76 +100,103 @@ def option1(password_min, password_max):
  
 # ============================================
 
-#Option 2 for Passwords
+# Option 2 for Passwords - Word concatenation
 def option2(password_min, password_max, need_numbers, need_symbols):
     words_to_choose = []
     with open('password_nouns.txt', 'r') as password_words_file:
     # Read the file
        words = password_words_file.read()
+       # make list of words to choose from the txt of words
        words_to_choose = words.splitlines()
-
+    # determine a length for the password
     password_length = random.randint(password_min, password_max)
 
     while True:
         password_words= []
         password_result = ""
+        # randomize a number of words to concatenate
         num_words_in_pass = random.randrange(2, 4)
         
         password_result = ""
+        
         for i in range(num_words_in_pass):
+            # choose words in the list of words
             choice_word = random.choice(words_to_choose)
             cap = random.choice([False, True])
+            # if cap is true or false, capitalize the chosen words or not
             if cap:
                 word_to_add = choice_word.capitalize()
             else:
                 word_to_add = choice_word
             
+            # add the words together
             password_words.append(word_to_add)
-            
+        
+        # Randomize choice of true or false
+        # if true, concatenation will be symbols then numbers and if false, then the other way around
         order_num_symb = random.choice([False, True])
         if order_num_symb:
             if need_symbols == True:
+                # randomize choosing 1 or 2 symbols
                 num_symbols = random.randint(1,2)
                 for i in range(num_symbols):
+                    # randomize symbols choice
                     symbol = random.choice(symbols)
+                    # add the symbol/number to the password words list
                     password_words.append(symbol)
                 
             if need_numbers == True:
+                # randomize choosing 1 to 3 numbers
                 num_nums = random.randint(1,3)
                 for i in range(num_nums):
+                    # randomize digits choice
                     number = str(random.choice(digits))
+                    # add the symbol/number to the password words list
                     password_words.append(number)
         else:
             if need_numbers == True:
                 num_nums = random.randint(1,3)
                 for i in range(num_nums):
+                    # randomize digits choice
                     number = str(random.choice(digits))
+                    # add the symbol/number to the password words list
                     password_words.append(number)
                 
             if need_symbols == True:
                 num_symbols = random.randint(1,2)
                 for i in range(num_symbols):
+                    # randomize symbols choice
                     symbol = random.choice(symbols)
+                    # add the symbol/number to the password words list
                     password_words.append(symbol)                   
         
+        # for each password word, add them together to make the resulting concatenation
         for i in password_words:
             password_result = password_result + i
         
+        # if the length of the password is what was made, then return, otherwise, try again until made!
         if len(password_result) == int(password_length):
             return password_result
         
 # =============================================
 # Append data to user_data list
 def add_to_csv(email, final_password, security_answers):
+    # made dataframe from csv
     df = pd.read_csv('password_user_data.csv')
+    # put all emails into a list
     all_stored_emails = df['User Email'].tolist()
+    # if the email is already in the list of stored emails, then increase a number of created passwords
     if email in all_stored_emails:
         current_num_passwords = all_stored_emails.count(email)
         current_num_passwords += 1
+    # otherwise, start the number of passwords an email has to be 1
     else:
         current_num_passwords = 1
+    # find today's date
     password_date = date.today()
+    
     # Initialize an empty data list
+    # add email, number of passwords, password, and date and security answers to the dataframe
     new_data = {
         'User Email': email,
         'Index of password associated with this email': current_num_passwords,
@@ -174,13 +207,16 @@ def add_to_csv(email, final_password, security_answers):
     # Convert user_data list to DataFrame
     df2 = pd.DataFrame([new_data])
     
+    # add the dataframes together (existing and new input)
     df = pd.concat([df, df2], ignore_index=True)
     
+    # turn into CSV
     df.to_csv('password_user_data.csv', index=False)
 
 # =======================================================
 def numbers_and_symbols(additives):
-
+    # thi function determines if the user inputs digits or symbols in their form and how to take care of it
+    # if they want both, then both are true, not both, both are false, and then cases for one of each
     if 'symbols' in additives and 'digits' not in additives:
         need_symbols = True
         need_numbers = False
@@ -202,22 +238,28 @@ def numbers_and_symbols(additives):
 # =======================================================
 @app.route('/', methods=['GET','POST'])
 def password_generator():
+    # password generator flask app route
+    # initialize email, final password, and security answers
     email = ''  
     final_password = ''  
     security_answers = {}  
     
+    # if information is input in HTML format:
     if request.method == 'POST':
         # Randomly choose three security questions
         three_questions = random.sample(list(sec_questions.items()), 3)
-        
+        # try to convert the email to lowercase
+        # if not possible, email = None, which means that it won't save anyways down the line
         try:
             email = request.form['email'].lower()
         except:
             email = None 
+        # get the type of password the user wants: concatenation or random
         try:
             password_type = request.form['option']
         except:
             no_entry = True  
+            # if nothing is chosen and they press submit, then tell them they cannot make a password
             return render_template('password_generator.html', three_questions=three_questions, no_entry=no_entry)
         
         additives = request.form.getlist('additions')
@@ -254,6 +296,7 @@ def password_generator():
                 security_answers[question_text] = 'Not answered'
            
         if email and list(security_answers.values()).count('Not answered') == 6:
+            save_success = True
             save_success = add_to_csv(email, final_password, security_answers)
         else:
             save_success = False
@@ -323,7 +366,6 @@ def get_passwords():
         if answers_given == answers_to_presented_questions:
             print_passwords = True
             passwords_to_present = user_entries['Generated Password']
-            print('passwords',passwords_to_present)
             return render_template('get_passwords.html', passwords_to_present=passwords_to_present, print_passwords=print_passwords, global_email=global_email, user_entries=user_entries)
         else:
             return render_template('get_passwords.html', message="Your answers do not match.", questions_to_answer_to_get_passwords=questions_to_answer_to_get_passwords)
@@ -334,9 +376,3 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 # =============================================
-
-
-
-
-
-
