@@ -54,7 +54,7 @@ answers_to_presented_questions = []
 
 # =============================================
 
-# Extract security question answers
+# Security questions dictionary
 sec_questions = {
         1: 'What is the name of your childhood best friend?',
         2: 'In which city did your parents meet?',
@@ -127,7 +127,7 @@ def option2(password_min, password_max, need_numbers, need_symbols):
             if cap:
                 word_to_add = choice_word.capitalize()
             else:
-                word_to_add = choice_word
+                word_to_add = choice_word.lower()
             
             # add the words together
             password_words.append(word_to_add)
